@@ -13,7 +13,13 @@ __pragma__('noalias', 'update')
 def plan_road_path(flag1, flag2):
     point1 = Game.flags[flag1].pos
     point2 = Game.flags[flag2].pos
-    path = this.findPath(point1, point2, {'ignoreDestructibleStructures': 'true', 'ignoreCreeps': 'true'})
-    for i in range(path.length):
-        Game.spawns["Snow"].room.createConstructionSite(path[i].x, path[i].y, STRUCTURE_ROAD)
+    #path = this.findPathTo(point1, point2, {'ignoreDestructibleStructures': 'true', 'ignoreCreeps': 'true'})
+    path = PathFinder.search(point1, point2, {'ignoreDestructibleStructures': 'true', 'ignoreCreeps': 'true'}).path
+    for i in path:
+        Game.spawns["Snow"].room.createConstructionSite(i.x, i.y, STRUCTURE_ROAD)
     return 0
+
+
+def remove_flags():
+    for i in Game.flags:
+        del i

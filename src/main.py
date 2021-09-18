@@ -4,6 +4,7 @@ from bots import harvester, builder
 #  Game, etc. do exist.
 from defs import *
 import scripts.creep_related
+import scripts.building
 
 # These are currently required for Transcrypt in order to use the following names in JavaScript.
 # Without the 'noalias' pragma, each of the following would be translated into something like 'py_Infinity' or
@@ -24,9 +25,13 @@ role_dict = {
 }
 
 
-js_global.delete_all = scripts.creep_related.delete_all_creep_memory
+#creep related scripts
 js_global.delete_creep = scripts.creep_related.delete_creep
 js_global.emergency_harvest = scripts.creep_related.emergency_harvest
+
+#building scripts
+js_global.build_road = scripts.building.plan_road_path
+js_global.remove_all_flags = scripts.building.remove_flags
 
 
 def main():
