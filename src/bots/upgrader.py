@@ -10,7 +10,7 @@ __pragma__('noalias', 'type')
 __pragma__('noalias', 'update')
 
 
-def run_spawn_delivery(creep):
+def run_upgrader(creep):
     if not creep.memory.working and creep.store[RESOURCE_ENERGY] == 0:
         creep.memory.working = True
         creep.say('collecting')
@@ -22,5 +22,5 @@ def run_spawn_delivery(creep):
         if creep.harvest(nearest) == ERR_NOT_IN_RANGE:
             creep.moveTo(nearest, {"visualizePathStyle": {"stroke": '#ffaa00'}})
     else:
-        if creep.transfer(Game.spawns['Snow'], RESOURCE_ENERGY) == ERR_NOT_IN_RANGE:
-            creep.moveTo(Game.spawns['Snow'])
+        if creep.transfer(STRUCTURE_CONTROLLER, RESOURCE_ENERGY) == ERR_NOT_IN_RANGE:
+            creep.moveTo(STRUCTURE_CONTROLLER)

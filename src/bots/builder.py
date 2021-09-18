@@ -11,21 +11,19 @@ __pragma__('noalias', 'update')
 
 
 def run_builder(creep):
-        if creep.memory.building and creep.store[RESOURCE_ENERGY] == 0:
-            creep.memory.building = False
-            creep.say('🔄 harvest')
+    if creep.memory.building and creep.store[RESOURCE_ENERGY] == 0:
+        creep.memory.building = False
+        creep.say('🔄 harvest')
 
-        if not creep.memory.building and creep.store.getFreeCapacity() == 0:
-            creep.memory.building = True
-            creep.say('🚧 build')
+    if not creep.memory.building and creep.store.getFreeCapacity() == 0:
+        creep.memory.building = True
+        creep.say('🚧 build')
 
-        if creep.memory.building:
-            targets = creep.room.find(FIND_CONSTRUCTION_SITES)
-            if targets.length:
-                if creep.build(targets[0]) == ERR_NOT_IN_RANGE:
-                    creep.moveTo(targets[0], {"visualizePathStyle": {"stroke": '#ffffff'}})
-
-        else:
-            sources = creep.room.find(FIND_SOURCES)
-            if creep.harvest(sources[0]) == ERR_NOT_IN_RANGE:
-                creep.moveTo(sources[0], {"visualizePathStyle": {"stroke": '#ffaa00'}})
+    if creep.memory.building:
+        nearest = creep.pos.findClosestByRange(FIND_CONSTRUCTION_SITES)
+        if creep.build(nearest) == ERR_NOT_IN_RANGE:
+            creep.moveTo(nearest, {"visualizePathStyle": {"stroke": '#ffffff'}})
+    else:
+        nearest = creep.pos.findClosestByRange(FIND_SOURCES_ACTIVE)
+        if creep.harvest(nearest) == ERR_NOT_IN_RANGE:
+            creep.moveTo(nearest, {"visualizePathStyle": {"stroke": '#ffaa00'}})

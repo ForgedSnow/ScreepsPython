@@ -15,20 +15,10 @@ def delete_creep(name):
     return 0
 
 
-'''
-def delete_all_creep_memory():
-    num = 0
-    for name in Object.keys(Game.creeps):
-        num += 1
-        Memory.creeps.pop(0)
-    print("deleted memory from", num, "creeps")
-    return 0
-for(var i in Memory.creeps) {
-    if(!Game.creeps[i]) {
-        delete Memory.creeps[i];
-    }
-}
-'''
+def clean_memory():
+    for name, creep in _.pairs(Memory.creeps):
+        if not (name in Game.creeps):
+            del Memory.creeps[name]
 
 
 def emergency_harvest():
