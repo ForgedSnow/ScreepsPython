@@ -19,12 +19,6 @@ __pragma__('noalias', 'type')
 __pragma__('noalias', 'update')
 
 
-role_dict = {
-    'harvester': harvester.run_harvester,
-    'builder': builder.run_builder,
-}
-
-
 #creep related scripts
 js_global.delete_creep = scripts.creep_related.delete_creep
 js_global.emergency_harvest = scripts.creep_related.emergency_harvest
@@ -32,6 +26,12 @@ js_global.emergency_harvest = scripts.creep_related.emergency_harvest
 #building scripts
 js_global.build_road = scripts.building.plan_road_path
 js_global.remove_all_flags = scripts.building.remove_flags
+
+
+role_dict = {
+    'harvester': harvester.run_harvester,
+    'builder': builder.run_builder,
+}
 
 
 def main():
@@ -51,6 +51,9 @@ def main():
     for name in Object.keys(Game.spawns):
         spawn = Game.spawns[name]
         if not spawn.spawning:
+            # always have one builder
+            creep_name = "{}{}".format("harvester-", Game.time)
+            spawn.spawnCreep([WORK, WORK, MOVE, CARRY], creep_name, {'memory': {'role': 'builder'}})
             # Get the number of our creeps in the room.
             num_creeps = _.sum(Game.creeps, lambda c: c.pos.roomName == spawn.pos.roomName)
             # If there are no creeps, spawn a creep once energy is at 250 or more

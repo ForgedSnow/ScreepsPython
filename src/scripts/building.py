@@ -21,5 +21,6 @@ def plan_road_path(flag1, flag2):
 
 
 def remove_flags():
-    for i in Game.flags:
-        del i
+    for key, value in _.pairs(Game.flags):
+        Game.flags[key].remove()
+    return 0
