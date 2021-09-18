@@ -20,6 +20,14 @@ def plan_road_path(flag1, flag2):
     return 0
 
 
+def plan_storage(x, y):
+    Game.spawns["Snow"].room.createConstructionSite(x, y, STRUCTURE_STORAGE)
+
+
+def plan_container(x, y):
+    Game.spawns["Snow"].room.createConstructionSite(x, y, STRUCTURE_CONTAINER)
+
+
 def remove_flags():
     for key, value in _.pairs(Game.flags):
         Game.flags[key].remove()

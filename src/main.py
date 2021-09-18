@@ -53,7 +53,7 @@ roles = ['spawn_feeder', 'upgrader', 'builder', 'harvester']
 hard_coded_workers = {
     'harvester': 8,
     'spawn_feeder': 2,
-    'builder': 3,
+    'builder': 5,
     'upgrader': 1
 }
 
