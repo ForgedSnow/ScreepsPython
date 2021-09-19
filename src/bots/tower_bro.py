@@ -11,19 +11,15 @@ __pragma__('noalias', 'update')
 
 
 def make_parts(max_energy):
-    parts = [WORK, CARRY, MOVE, MOVE]
+    parts = [CARRY, CARRY, CARRY, MOVE, MOVE, MOVE]
     count = max_energy - 300
+    if count > 600:
+        count = 600
     if max_energy <= 300:
-        return [WORK, CARRY, MOVE, MOVE]
+        return parts
     while count >= 50:
-        if count >= 100:
-            parts.append(WORK)
-            count -= 100
         if count >= 50:
             parts.append(CARRY)
-            count -= 50
-        if count >= 50:
-            parts.append(MOVE)
             count -= 50
         if count >= 50:
             parts.append(MOVE)
@@ -31,7 +27,7 @@ def make_parts(max_energy):
     return parts
 
 
-def run_builder(creep):
+def run_tower_bro(creep):
     if creep.memory.building and creep.store[RESOURCE_ENERGY] == 0:
         creep.memory.building = False
         creep.say('collect')
@@ -41,13 +37,16 @@ def run_builder(creep):
         creep.say('build')
 
     if creep.memory.building:
-        nearest = creep.pos.findClosestByRange(FIND_CONSTRUCTION_SITES)
-        if creep.build(nearest) == ERR_NOT_IN_RANGE:
-            creep.moveTo(nearest, {"visualizePathStyle": {"stroke": '#ffffff'}})
+        nearest = creep.pos.findClosestByRange(_.filter(creep.room.find(FIND_STRUCTURES),
+           lambda x: (x.structureType == STRUCTURE_TOWER)))
+        if nearest is None:
+            print("no nearest")
+        if creep.transfer(nearest, RESOURCE_ENERGY) == ERR_NOT_IN_RANGE:
+            creep.moveTo(nearest)
     else:
         nearest = creep.pos.findClosestByRange(_.filter(creep.room.find(FIND_STRUCTURES),
                         lambda x: (x.structureType == STRUCTURE_CONTAINER or x.structureType == STRUCTURE_STORAGE)
                                   and x.store.getUsedCapacity() > 0))
         #  print(creep, "builder", nearest)
         if creep.withdraw(nearest, RESOURCE_ENERGY) == ERR_NOT_IN_RANGE:
-            creep.moveTo(nearest, {"visualizePathStyle": {"stroke": '#ffaa00'}})
+            creep.moveTo(nearest)

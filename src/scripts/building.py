@@ -24,6 +24,10 @@ def plan_storage(x, y):
     Game.spawns["Snow"].room.createConstructionSite(x, y, STRUCTURE_STORAGE)
 
 
+def plan_road(x, y):
+    Game.spawns["Snow"].room.createConstructionSite(x, y, STRUCTURE_ROAD)
+
+
 def plan_container(x, y):
     Game.spawns["Snow"].room.createConstructionSite(x, y, STRUCTURE_CONTAINER)
 

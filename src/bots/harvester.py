@@ -10,6 +10,24 @@ __pragma__('noalias', 'type')
 __pragma__('noalias', 'update')
 
 
+def make_parts(max_energy):
+    parts = [WORK, CARRY, MOVE, MOVE]
+    count = max_energy - 300
+    if max_energy <= 300:
+        return [WORK, CARRY, MOVE, MOVE]
+    while count >= 50:
+        if count >= 100:
+            parts.append(WORK)
+            count -= 100
+        if count >= 50:
+            parts.append(CARRY)
+            count -= 50
+        if count >= 50:
+            parts.append(MOVE)
+            count -= 50
+    return parts
+
+
 def run_harvester(creep):
     """
     Runs a creep as a generic harvester.

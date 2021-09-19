@@ -1,4 +1,5 @@
-from bots import harvester, builder, spawn_delivery, upgrader
+from bots import harvester, builder, spawn_delivery, upgrader, miner, hauler, tower_bro
+from structures import tower_logic
 # defs is a package which claims to export all constants and some JavaScript objects, but in reality does
 #  nothing. This is useful mainly when using an editor like PyCharm, so that it 'knows' that things like Object, Creep,
 #  Game, etc. do exist.
@@ -35,6 +36,10 @@ js_global.clear_creeps = scripts.creep_related.clean_memory
 js_global.build_road = scripts.building.plan_road_path
 js_global.remove_all_flags = scripts.building.remove_flags
 
+js_global.new_container = scripts.building.plan_container
+js_global.new_storage = scripts.building.plan_storage
+js_global.new_road = scripts.building.plan_road
+
 #console variables
 js_global.debug = toggle_debug
 
@@ -44,17 +49,23 @@ role_dict = {
     'builder': builder.run_builder,
     'spawn_feeder': spawn_delivery.run_spawn_delivery,
     'upgrader': upgrader.run_upgrader,
+    'miner': miner.run_miner,
+    'hauler': hauler.run_hauler,
+    'tower_bro': tower_bro.run_tower_bro,
 }
 
 # order in decreasing priority
-roles = ['spawn_feeder', 'upgrader', 'builder', 'harvester']
+roles = ['hauler', 'miner', 'tower_bro', 'spawn_feeder', 'upgrader', 'builder', 'harvester']
 
 
 hard_coded_workers = {
-    'harvester': 8,
-    'spawn_feeder': 2,
-    'builder': 5,
-    'upgrader': 1
+    'harvester': 0,
+    'spawn_feeder': 0,
+    'builder': 1,
+    'upgrader': 2,
+    'miner': 2,
+    'hauler': 2,
+    'tower_bro': 1,
 }
 
 
@@ -62,12 +73,40 @@ role_count = {
     'harvester': -1,
     'spawn_feeder': -1,
     'builder': -1,
-    'upgrader': -1
+    'upgrader': -1,
+    'miner': -1,
+    'hauler': -1,
+    'tower_bro': -1,
 }
 
 
+role_body = {
+    'harvester': harvester.make_parts,
+    'builder': builder.make_parts,
+    'spawn_feeder': spawn_delivery.make_parts,
+    'upgrader': upgrader.make_parts,
+    'miner': miner.make_parts,
+    'hauler': hauler.make_parts,
+    'tower_bro': tower_bro.make_parts,
+}
+
+
+def create(role):
+    spawn = Game.spawns["Snow"]
+    body = role_body[role](spawn.room.energyAvailable)
+    if spawn.spawnCreep(body, "{}{}".format("Creep-", Game.time),
+                        {'memory': {'role': role}}) == 0:
+        print("creep order fulfilled")
+    else:
+        print("not enough energy")
+
+
+js_global.create = create
+
+
 def print_roles():
-    print(*count_roles())
+    print(*count_roles(), sep="")
+    return 0
 
 
 js_global.print_bots = print_roles
@@ -93,8 +132,7 @@ def count_roles():
     for role in _.keys(hard_coded_workers):
         count = len(_.filter(Object.keys(Game.creeps), lambda x: Game.creeps[x].memory.role is role))
         _.set(role_count, role, count)
-        print(role, count)
-        out_put.append("{}: {}".format(role, count))
+        out_put.append("{}: {}\n".format(role, count))
     return out_put
 
 
@@ -109,6 +147,12 @@ def main():
     """
     Main game logic loop.
     """
+    #run towers
+
+    for tower in _.filter(Game.spawns["Snow"].room.find(FIND_STRUCTURES), lambda x: x.structureType == STRUCTURE_TOWER):
+        tower_logic.run_tower(tower)
+    #  print(_.filter(Game.spawns["Snow"].room.find(FIND_STRUCTURES), lambda x: x.structureType == STRUCTURE_TOWER))
+
     # Run each creep
     for name in Object.keys(Game.creeps):
         creep = Game.creeps[name]
@@ -132,15 +176,24 @@ def main():
     for name in Object.keys(Game.spawns):
         spawn = Game.spawns[name]
         if not spawn.spawning:
+            if spawn.room.energyAvailable < 300:
+                break
             for role in roles:
                 if role_count[role] < hard_coded_workers[role]:
+                    print("energy", spawn.room.energyAvailable)
+                    '''
                     if spawn.spawnCreep([WORK, WORK, MOVE, CARRY], "{}{}".format("Creep-", Game.time), {'memory': {'role': role}}) == 0:
                         print(role, "created")
                         return 0
+                    '''
+                    body = role_body[role](spawn.room.energyAvailable)
+                    if spawn.spawnCreep(body, "{}{}".format("Creep-", Game.time),
+                                        {'memory': {'role': role}}) == 0:
+                        print(role, body, "created")
+                        return 0
+                    else:
+                        print(body, "too expensive")
 
-            # always have one builder
-            if spawn.spawnCreep([WORK, WORK, MOVE, CARRY], "BuilderOmega", {'memory': {'role': 'builder'}}) == 0:
-                return 0
             if len(Game.creeps) < 1 and spawn.room.energyAvailable >= 250:
                 spawn.createCreep([WORK, CARRY, MOVE], "bootstrap")
                 boot = Memory.creeps["bootstrap"]

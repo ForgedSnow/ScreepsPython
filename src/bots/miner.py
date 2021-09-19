@@ -11,34 +11,29 @@ __pragma__('noalias', 'update')
 
 
 def make_parts(max_energy):
-    parts = [WORK, CARRY, MOVE, MOVE]
+    parts = [WORK, WORK, MOVE]
     count = max_energy - 300
     if max_energy <= 300:
-        return [WORK, CARRY, MOVE, MOVE]
-    while count >= 50:
+        return [WORK, WORK, MOVE]
+    if max_energy >= 600:
+        return [WORK, WORK, WORK, WORK, WORK, MOVE, MOVE]
+    while count >= 100:
         if count >= 100:
             parts.append(WORK)
             count -= 100
-        if count >= 50:
-            parts.append(CARRY)
-            count -= 50
-        if count >= 50:
-            parts.append(MOVE)
-            count -= 50
     return parts
 
 
-def run_upgrader(creep):
+def run_miner(creep):
     if not creep.memory.working and creep.store[RESOURCE_ENERGY] == 0:
         creep.memory.working = True
-        creep.say('collecting')
+        creep.say('mining')
     if creep.memory.working and creep.store.getFreeCapacity() == 0:
         creep.memory.working = False
-        creep.say('upgrading')
+        creep.say('waiting')
     if creep.memory.working:
         nearest = creep.pos.findClosestByRange(FIND_SOURCES_ACTIVE)
         if creep.harvest(nearest) == ERR_NOT_IN_RANGE:
             creep.moveTo(nearest, {"visualizePathStyle": {"stroke": '#ffaa00'}})
     else:
-        if creep.upgradeController(creep.room.controller) == ERR_NOT_IN_RANGE:
-            creep.moveTo(creep.room.controller)
+        pass
