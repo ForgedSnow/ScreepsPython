@@ -11,10 +11,10 @@ __pragma__('noalias', 'update')
 
 
 def make_parts(max_energy):
-    parts = [CARRY, CARRY, CARRY, MOVE, MOVE, MOVE]
+    parts = [CARRY, CARRY, CARRY, CARRY, MOVE, MOVE]
     count = max_energy - 300
-    if count > 600:
-        count = 600
+    if count >= 300:
+        count = 350
     if max_energy <= 300:
         return parts
     while count >= 50:
@@ -30,19 +30,23 @@ def make_parts(max_energy):
 def run_tower_bro(creep):
     if creep.memory.building and creep.store[RESOURCE_ENERGY] == 0:
         creep.memory.building = False
-        creep.say('collect')
+        #  creep.say('collect')
 
     if not creep.memory.building and creep.store.getFreeCapacity() == 0:
         creep.memory.building = True
-        creep.say('build')
+        #  creep.say('build')
 
     if creep.memory.building:
         nearest = creep.pos.findClosestByRange(_.filter(creep.room.find(FIND_STRUCTURES),
            lambda x: (x.structureType == STRUCTURE_TOWER)))
-        if nearest is None:
-            print("no nearest")
-        if creep.transfer(nearest, RESOURCE_ENERGY) == ERR_NOT_IN_RANGE:
-            creep.moveTo(nearest)
+        if nearest.store.getFreeCapacity(RESOURCE_ENERGY) <= 0:
+            nearest = creep.pos.findClosestByRange(_.filter(creep.room.find(FIND_STRUCTURES),
+                                             lambda x: (x.structureType == STRUCTURE_LINK)))
+        else:
+            pass
+        if nearest:
+            if creep.transfer(nearest, RESOURCE_ENERGY) == ERR_NOT_IN_RANGE:
+                creep.moveTo(nearest)
     else:
         nearest = creep.pos.findClosestByRange(_.filter(creep.room.find(FIND_STRUCTURES),
                         lambda x: (x.structureType == STRUCTURE_CONTAINER or x.structureType == STRUCTURE_STORAGE)

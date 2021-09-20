@@ -14,7 +14,9 @@ def make_parts(max_energy):
     parts = [WORK, CARRY, MOVE, MOVE]
     count = max_energy - 300
     if max_energy <= 300:
-        return [WORK, CARRY, MOVE, MOVE]
+        return parts
+    if max_energy >= 750:
+        return [WORK, CARRY, MOVE, MOVE, WORK, CARRY, MOVE, MOVE, WORK, CARRY, CARRY, CARRY]
     while count >= 50:
         if count >= 100:
             parts.append(WORK)

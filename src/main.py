@@ -1,5 +1,5 @@
 from bots import harvester, builder, spawn_delivery, upgrader, miner, hauler, tower_bro
-from structures import tower_logic
+from structures import tower_logic, link_logic
 # defs is a package which claims to export all constants and some JavaScript objects, but in reality does
 #  nothing. This is useful mainly when using an editor like PyCharm, so that it 'knows' that things like Object, Creep,
 #  Game, etc. do exist.
@@ -21,16 +21,39 @@ __pragma__('noalias', 'update')
 
 
 DEBUG = False
+
+
+def check_for_portals():
+    spawn = Game.spawns["Snow"]
+    for id, room in _.pairs(Game.rooms):
+        print(room)
+    return 0
+
+
+js_global.portals = check_for_portals
+
+
 def toggle_debug():
     global DEBUG
     DEBUG = False if DEBUG else True
     return DEBUG
 
 
+def create_chad(role):
+    spawn = Game.spawns["Snow"]
+    body = role_body[role](spawn.room.energyAvailable)
+    if spawn.spawnCreep(body, "{}{}".format("Creep-", Game.time),
+                        {'memory': {'role': role, 'chad': True}}) == 0:
+        print("incoming chad", body)
+    else:
+        print("not enough energy")
+
+
 #creep related scripts
 js_global.delete_creep = scripts.creep_related.delete_creep
 js_global.emergency_harvest = scripts.creep_related.emergency_harvest
 js_global.clear_creeps = scripts.creep_related.clean_memory
+js_global.create_chad = create_chad
 
 #building scripts
 js_global.build_road = scripts.building.plan_road_path
@@ -62,7 +85,7 @@ hard_coded_workers = {
     'harvester': 0,
     'spawn_feeder': 0,
     'builder': 1,
-    'upgrader': 2,
+    'upgrader': 4,
     'miner': 2,
     'hauler': 2,
     'tower_bro': 1,
@@ -112,6 +135,13 @@ def print_roles():
 js_global.print_bots = print_roles
 
 
+def body_cost(body):
+    cost = 0
+    for part in body:
+        cost += BODYPART_COST[part]
+    return cost
+
+
 def culling_time(role, amount):
     count = 0
     for bot in _.filter(Object.keys(Game.creeps), lambda x: Game.creeps[x].memory.role is role):
@@ -148,10 +178,16 @@ def main():
     Main game logic loop.
     """
     #run towers
-
     for tower in _.filter(Game.spawns["Snow"].room.find(FIND_STRUCTURES), lambda x: x.structureType == STRUCTURE_TOWER):
         tower_logic.run_tower(tower)
     #  print(_.filter(Game.spawns["Snow"].room.find(FIND_STRUCTURES), lambda x: x.structureType == STRUCTURE_TOWER))
+
+    #  run links
+    for link in Game.spawns["Snow"].room.find(FIND_STRUCTURES, {"filter": lambda x: x.structureType == STRUCTURE_LINK}):
+        if link.pos.x == 15 and link.pos.y == 40:
+            link_logic.run_link(link)
+    # link = Game.spawns["Snow"].room.find(FIND_STRUCTURES, {"filter": lambda x: x.structureType == STRUCTURE_LINK})[0]
+    # link_logic.run_link(link)
 
     # Run each creep
     for name in Object.keys(Game.creeps):
@@ -189,7 +225,7 @@ def main():
                     body = role_body[role](spawn.room.energyAvailable)
                     if spawn.spawnCreep(body, "{}{}".format("Creep-", Game.time),
                                         {'memory': {'role': role}}) == 0:
-                        print(role, body, "created")
+                        print(role, body, "created. Cost:", body_cost(body))
                         return 0
                     else:
                         print(body, "too expensive")

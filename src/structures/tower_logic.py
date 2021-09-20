@@ -30,7 +30,8 @@ def run_tower(tower):
     #  repair structures, third priority
     lowest_health = tower.pos.findClosestByRange(
         _.filter(tower.room.find(FIND_STRUCTURES),
-                 lambda structure: structure.hits < 4000 and structure.hitsMax >= 4000),
+                 lambda structure: structure.hits < 4000 and structure.hitsMax >= 4000 or
+                                   (structure.structureType is STRUCTURE_CONTAINER and structure.hits < 225000)),
     )
     if lowest_health:
         tower.repair(lowest_health)
