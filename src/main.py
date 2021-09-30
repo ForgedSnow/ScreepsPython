@@ -84,8 +84,8 @@ roles = ['hauler', 'miner', 'tower_bro', 'spawn_feeder', 'upgrader', 'builder', 
 hard_coded_workers = {
     'harvester': 0,
     'spawn_feeder': 0,
-    'builder': 1,
-    'upgrader': 4,
+    'builder': 0,
+    'upgrader': 1,
     'miner': 2,
     'hauler': 2,
     'tower_bro': 1,
@@ -215,7 +215,26 @@ def main():
             if spawn.room.energyAvailable < 300:
                 break
             for role in roles:
-                if role_count[role] < hard_coded_workers[role]:
+                dynamic_count = 0
+                if role is "upgrader":
+                    storage = spawn.room.storage
+
+                    def dynamic_count(ratio):
+                        if ratio > 0.99:
+                            return 6
+                        if ratio > 0.9:
+                            return 4
+                        if ratio > 0.75:
+                            return 3
+                        if ratio > 0.5:
+                            return 2
+                        if ratio > 0.1:
+                            return 1
+                        return 0
+                    dynamic_count = dynamic_count(storage.store.getUsedCapacity(RESOURCE_ENERGY)
+                                                  / storage.store.getCapacity(RESOURCE_ENERGY))
+
+                if role_count[role] < hard_coded_workers[role] + dynamic_count:
                     print("energy", spawn.room.energyAvailable)
                     '''
                     if spawn.spawnCreep([WORK, WORK, MOVE, CARRY], "{}{}".format("Creep-", Game.time), {'memory': {'role': role}}) == 0:
