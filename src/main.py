@@ -173,6 +173,11 @@ def cp(*args):
     return 0
 
 
+def find_structures(structure, room):
+    return room.find(FIND_STRUCTURES, {"filter": lambda x: x.structureType == structure})
+    # return _.filter(room.find(FIND_STRUCTURES), lambda x: x.structureType == structure)
+
+
 def main():
     """
     Main game logic loop.
